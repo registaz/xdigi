@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+model Developer {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  skills DeveloperSkill[]
+  tasks  Task[]
+
+  @@map("developers")
+}
+
+model Skill {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  developers DeveloperSkill[]
+  tasks      TaskSkill[]
+
+  @@map("skills")
+}
+
+model DeveloperSkill {
+  developerId String
+  skillId     String
+
+  developer Developer @relation(fields: [developerId], references: [id], onDelete: Cascade)
+  skill     Skill     @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([developerId, skillId])
+  @@map("developer_skills")
+}
+
+model Task {
+  id           String     @id @default(uuid())
+  title        String
+  status       TaskStatus @default(TODO)
+  developerId  String?
+  parentTaskId String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  developer  Developer? @relation(fields: [developerId], references: [id], onDelete: SetNull)
+  parentTask Task?      @relation("TaskSubtasks", fields: [parentTaskId], references: [id], onDelete: Cascade)
+  subtasks   Task[]     @relation("TaskSubtasks")
+  skills     TaskSkill[]
+
+  @@index([developerId])
+  @@index([parentTaskId])
+  @@index([status])
+  @@map("tasks")
+}
+
+model TaskSkill {
+  taskId  String
+  skillId String
+
+  task  Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, skillId])
+  @@map("task_skills")
+}
