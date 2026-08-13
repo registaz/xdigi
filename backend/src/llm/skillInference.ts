@@ -80,12 +80,16 @@ export async function inferSkills(title: string): Promise<string[]> {
     return keywordFallback(title);
   }
 
+  logger.info({ title }, "Calling Gemini LLM for skill inference");
+  
   const maxAttempts = 2;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       const result = await model.generateContent(buildPrompt(title));
       const text = result.response.text().trim();
-      return parseSkillsFromResponse(text);
+      const skills = parseSkillsFromResponse(text);
+      logger.info({ title, skills }, "Gemini LLM skill inference succeeded");
+      return skills;
     } catch (err) {
       logger.warn({ err, attempt }, "Gemini skill inference attempt failed");
     }
