@@ -70,9 +70,21 @@ function parseSkillsFromResponse(text: string): string[] {
 }
 
 /**
- * Runs skill classification against a single Gemini model, retrying once on
- * failure. Returns null (never throws) if both attempts fail, so callers
- * can move on to the next fallback tier.
+ * Base delay (ms) before retrying the same model after a failed attempt.
+ * Gemini's transient errors (e.g. 503 "high demand") rarely recover if
+ * retried immediately back-to-back, so a short pause gives the retry an
+ * actual chance to succeed without adding much latency to task creation.
+ */
+const RETRY_DELAY_MS = 300;
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Runs skill classification against a single Gemini model, retrying once
+ * (after a short delay) on failure. Returns null (never throws) if both
+ * attempts fail, so callers can move on to the next fallback tier.
  */
 async function tryModel(model: GenerativeModel, title: string, modelLabel: string): Promise<string[] | null> {
   const maxAttempts = 2;
@@ -84,7 +96,17 @@ async function tryModel(model: GenerativeModel, title: string, modelLabel: strin
       logger.info({ title, skills, model: modelLabel }, "Gemini LLM skill inference succeeded");
       return skills;
     } catch (err) {
-      logger.warn({ err, attempt, model: modelLabel }, "Gemini skill inference attempt failed");
+      const isLastAttempt = attempt === maxAttempts;
+      // Only the final failure for this model tier is worth a `warn` — a
+      // single transient blip that succeeds on retry (or is absorbed by
+      // the next fallback tier) isn't actionable noise.
+      logger[isLastAttempt ? "warn" : "debug"](
+        { err, attempt, model: modelLabel },
+        "Gemini skill inference attempt failed",
+      );
+      if (!isLastAttempt) {
+        await delay(RETRY_DELAY_MS);
+      }
     }
   }
   return null;
