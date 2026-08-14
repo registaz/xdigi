@@ -132,6 +132,7 @@
   padding: 0;
   text-align: left;
   vertical-align: middle;
+  height: 1px;
 }
 
 .cell-collapse {
@@ -139,6 +140,7 @@
   grid-template-rows: 1fr;
   transition: grid-template-rows 0.22s ease;
   overflow: hidden;
+  height: 100%;
 }
 
 .cell-collapse--collapsed {
@@ -146,6 +148,8 @@
 }
 
 .cell-collapse-inner {
+  display: flex;
+  align-items: center;
   overflow: hidden;
   min-height: 0;
   padding: 10px 12px;
@@ -180,8 +184,6 @@
 }
 
 .task-title-cell .cell-collapse-inner {
-  display: flex;
-  align-items: center;
   white-space: nowrap;
 }
 
