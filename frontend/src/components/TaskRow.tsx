@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { Developer, Task, TaskStatus } from "../types";
 import { StatusSelect } from "./StatusSelect";
 import { DeveloperSelect } from "./DeveloperSelect";
@@ -13,13 +14,24 @@ interface TaskRowProps {
   developers: Developer[];
   onChanged: () => void;
   isLast?: boolean;
+  hidden?: boolean;
 }
 
 function countSubtasks(task: Task): number {
   return task.subtasks.reduce((sum, sub) => sum + 1 + countSubtasks(sub), 0);
 }
 
-export function TaskRow({ task, depth, developers, onChanged, isLast = true }: TaskRowProps) {
+function CollapsibleCell({ collapsed, className, children }: { collapsed: boolean; className?: string; children: ReactNode }) {
+  return (
+    <td className={className}>
+      <div className={`cell-collapse${collapsed ? " cell-collapse--collapsed" : ""}`}>
+        <div className="cell-collapse-inner">{children}</div>
+      </div>
+    </td>
+  );
+}
+
+export function TaskRow({ task, depth, developers, onChanged, isLast = true, hidden = false }: TaskRowProps) {
   const { run, loading, error } = useAsyncAction((payload: { status?: TaskStatus; developerId?: string | null }) =>
     tasksApi.update(task.id, payload),
   );
@@ -56,7 +68,7 @@ export function TaskRow({ task, depth, developers, onChanged, isLast = true }: T
   return (
     <>
       <tr className={depth > 0 ? "task-row--nested" : undefined}>
-        <td className="task-title-cell">
+        <CollapsibleCell collapsed={hidden} className="task-title-cell">
           {depth > 0 && (
             <span
               className={`tree-guide tree-guide--${isLast ? "elbow" : "tee"}`}
@@ -79,14 +91,14 @@ export function TaskRow({ task, depth, developers, onChanged, isLast = true }: T
           )}
           <span className={`task-title-text${depth === 0 ? " task-title-text--root" : ""}`}>{task.title}</span>
           {hasSubtasks && !expanded && <span className="task-collapsed-count">{countSubtasks(task)}</span>}
-        </td>
-        <td>
+        </CollapsibleCell>
+        <CollapsibleCell collapsed={hidden}>
           <SkillBadges skills={task.skills} />
-        </td>
-        <td>
+        </CollapsibleCell>
+        <CollapsibleCell collapsed={hidden}>
           <StatusSelect value={task.status} disabled={loading} onChange={handleStatusChange} />
-        </td>
-        <td>
+        </CollapsibleCell>
+        <CollapsibleCell collapsed={hidden}>
           <DeveloperSelect
             developers={developers}
             requiredSkills={task.skills}
@@ -94,13 +106,13 @@ export function TaskRow({ task, depth, developers, onChanged, isLast = true }: T
             disabled={loading}
             onChange={handleDeveloperChange}
           />
-        </td>
-        <td>{countSubtasks(task)}</td>
-        <td>
+        </CollapsibleCell>
+        <CollapsibleCell collapsed={hidden}>{countSubtasks(task)}</CollapsibleCell>
+        <CollapsibleCell collapsed={hidden}>
           <button type="button" className="button button--danger" onClick={() => setShowDeleteModal(true)}>
             Delete
           </button>
-        </td>
+        </CollapsibleCell>
       </tr>
       {error && (
         <tr>
@@ -109,17 +121,17 @@ export function TaskRow({ task, depth, developers, onChanged, isLast = true }: T
           </td>
         </tr>
       )}
-      {expanded &&
-        task.subtasks.map((sub, index) => (
-          <TaskRow
-            key={sub.id}
-            task={sub}
-            depth={depth + 1}
-            isLast={index === task.subtasks.length - 1}
-            developers={developers}
-            onChanged={onChanged}
-          />
-        ))}
+      {task.subtasks.map((sub, index) => (
+        <TaskRow
+          key={sub.id}
+          task={sub}
+          depth={depth + 1}
+          isLast={index === task.subtasks.length - 1}
+          developers={developers}
+          onChanged={onChanged}
+          hidden={hidden || !expanded}
+        />
+      ))}
       <ConfirmDeleteModal
         isOpen={showDeleteModal}
         taskTitle={task.title}

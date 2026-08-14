@@ -121,12 +121,35 @@
   font-size: 14px;
 }
 
-.task-table th,
-.task-table td {
+.task-table th {
   padding: 10px 12px;
   border-bottom: 1px solid var(--border);
   text-align: left;
   vertical-align: middle;
+}
+
+.task-table td {
+  padding: 0;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.cell-collapse {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.22s ease;
+  overflow: hidden;
+}
+
+.cell-collapse--collapsed {
+  grid-template-rows: 0fr;
+}
+
+.cell-collapse-inner {
+  overflow: hidden;
+  min-height: 0;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
 }
 
 .task-table thead th {
@@ -149,17 +172,14 @@
   background: rgba(149, 93, 180, 0.24);
 }
 
-.task-title-cell {
+.task-title-cell .cell-collapse-inner {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   white-space: nowrap;
-  padding-top: 0;
-  padding-bottom: 0;
 }
 
 .task-title-text {
-  align-self: center;
-  padding: 10px 12px 10px 4px;
+  margin-left: 4px;
 }
 
 .task-title-text--root {
@@ -249,13 +269,13 @@
   border-radius: 999px;
 }
 
-.empty-state {
+.task-table td.empty-state {
   text-align: center;
   color: var(--text);
   padding: 24px 12px;
 }
 
-.row-error {
+.task-table td.row-error {
   color: #d1341f;
   font-size: 13px;
   padding: 4px 12px 12px;
