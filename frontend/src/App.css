@@ -174,7 +174,7 @@
 }
 
 .task-table tbody tr:hover {
-  background: var(--wisteria-bg);
+  background: rgba(15, 174, 219, 0.12);
 }
 
 .task-table tbody tr.task-row--nested {
