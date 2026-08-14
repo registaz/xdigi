@@ -149,10 +149,6 @@
   background: rgba(149, 93, 180, 0.24);
 }
 
-.task-row--nested td:first-child {
-  box-shadow: inset 3px 0 0 var(--wisteria);
-}
-
 .task-title-cell {
   display: flex;
   align-items: stretch;
