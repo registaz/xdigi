@@ -67,7 +67,7 @@ export function TaskRow({ task, depth, developers, onChanged, isLast = true, hid
 
   return (
     <>
-      <tr className={depth > 0 ? "task-row--nested" : undefined}>
+      <tr className={[depth > 0 ? "task-row--nested" : "", hidden ? "task-row--hidden" : ""].filter(Boolean).join(" ") || undefined}>
         <CollapsibleCell collapsed={hidden} className="task-title-cell">
           {depth > 0 && (
             <span

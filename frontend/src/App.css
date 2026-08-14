@@ -132,7 +132,12 @@
   padding: 0;
   text-align: left;
   vertical-align: middle;
-  height: 1px;
+  border-bottom: 1px solid var(--border);
+  transition: border-color 0.22s ease;
+}
+
+.task-row--hidden td {
+  border-bottom-color: transparent;
 }
 
 .cell-collapse {
@@ -140,7 +145,6 @@
   grid-template-rows: 1fr;
   transition: grid-template-rows 0.22s ease;
   overflow: hidden;
-  height: 100%;
 }
 
 .cell-collapse--collapsed {
@@ -153,14 +157,12 @@
   overflow: hidden;
   min-height: 0;
   padding: 10px 12px;
-  border-bottom: 1px solid var(--border);
-  transition: padding 0.22s ease, border-color 0.22s ease;
+  transition: padding 0.22s ease;
 }
 
 .cell-collapse--collapsed .cell-collapse-inner {
   padding-top: 0;
   padding-bottom: 0;
-  border-bottom-color: transparent;
 }
 
 .task-table thead th {
