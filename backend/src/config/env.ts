@@ -7,7 +7,7 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().default("http://localhost:5173"),
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
   GEMINI_API_KEY: z.string().optional(),
-  GEMINI_MODEL_STABLE: z.string().default("gemini-flash-latest"),
+  GEMINI_MODEL_STABLE: z.string().default("gemini-3.6-flash"),
   GEMINI_MODEL_FALLBACK: z.string().default("gemini-3.5-flash-lite"),
   // Human-readable colorized console logs by default (incl. in Docker).
   // Set to "false" to emit raw JSON lines instead (e.g. for a log
