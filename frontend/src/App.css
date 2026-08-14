@@ -137,15 +137,81 @@
   background: var(--bg-alt);
 }
 
-.task-title-cell {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
+.task-table tbody tr:hover {
+  background: var(--wisteria-bg);
 }
 
-.subtask-marker {
-  color: var(--text);
+.task-row--nested td {
+  background: transparent;
+}
+
+.task-title-cell {
+  display: flex;
+  align-items: stretch;
+  white-space: nowrap;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.task-title-text {
+  align-self: center;
+  padding: 10px 12px 10px 8px;
+}
+
+.task-title-text--root {
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.tree-guides {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.tree-guide {
+  position: relative;
+  width: 1.25rem;
+  flex-shrink: 0;
+}
+
+.tree-guide--line::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: var(--border);
+}
+
+.tree-guide--tee::before,
+.tree-guide--elbow::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  background: var(--border);
+}
+
+.tree-guide--tee::before {
+  bottom: 0;
+}
+
+.tree-guide--elbow::before {
+  height: 50%;
+}
+
+.tree-guide--tee::after,
+.tree-guide--elbow::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60%;
+  height: 1px;
+  background: var(--border);
+  border-radius: 999px;
 }
 
 .empty-state {

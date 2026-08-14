@@ -12,13 +12,22 @@ interface TaskRowProps {
   depth: number;
   developers: Developer[];
   onChanged: () => void;
+  isLast?: boolean;
+  ancestorContinues?: boolean[];
 }
 
 function countSubtasks(task: Task): number {
   return task.subtasks.reduce((sum, sub) => sum + 1 + countSubtasks(sub), 0);
 }
 
-export function TaskRow({ task, depth, developers, onChanged }: TaskRowProps) {
+export function TaskRow({
+  task,
+  depth,
+  developers,
+  onChanged,
+  isLast = true,
+  ancestorContinues = [],
+}: TaskRowProps) {
   const { run, loading, error } = useAsyncAction((payload: { status?: TaskStatus; developerId?: string | null }) =>
     tasksApi.update(task.id, payload),
   );
@@ -50,12 +59,21 @@ export function TaskRow({ task, depth, developers, onChanged }: TaskRowProps) {
     }
   }
 
+  const childAncestorContinues = [...ancestorContinues, !isLast];
+
   return (
     <>
-      <tr>
-        <td className="task-title-cell" style={{ paddingLeft: `${depth * 1.5 + 0.75}rem` }}>
-          {depth > 0 ? <span className="subtask-marker">↳</span> : null}
-          {task.title}
+      <tr className={depth > 0 ? "task-row--nested" : undefined}>
+        <td className="task-title-cell">
+          {depth > 0 && (
+            <span className="tree-guides" aria-hidden="true">
+              {ancestorContinues.map((continues, i) => (
+                <span key={i} className={`tree-guide${continues ? " tree-guide--line" : ""}`} />
+              ))}
+              <span className={`tree-guide tree-guide--${isLast ? "elbow" : "tee"}`} />
+            </span>
+          )}
+          <span className={`task-title-text${depth === 0 ? " task-title-text--root" : ""}`}>{task.title}</span>
         </td>
         <td>
           <SkillBadges skills={task.skills} />
@@ -86,8 +104,16 @@ export function TaskRow({ task, depth, developers, onChanged }: TaskRowProps) {
           </td>
         </tr>
       )}
-      {task.subtasks.map((sub) => (
-        <TaskRow key={sub.id} task={sub} depth={depth + 1} developers={developers} onChanged={onChanged} />
+      {task.subtasks.map((sub, index) => (
+        <TaskRow
+          key={sub.id}
+          task={sub}
+          depth={depth + 1}
+          isLast={index === task.subtasks.length - 1}
+          ancestorContinues={childAncestorContinues}
+          developers={developers}
+          onChanged={onChanged}
+        />
       ))}
       <ConfirmDeleteModal
         isOpen={showDeleteModal}

@@ -92,11 +92,12 @@ export function TaskListPage() {
                   </td>
                 </tr>
               )}
-              {tasks.map((task) => (
+              {tasks.map((task, index) => (
                 <TaskRow
                   key={task.id}
                   task={task}
                   depth={0}
+                  isLast={index === tasks.length - 1}
                   developers={developersState.data ?? []}
                   onChanged={tasksState.reload}
                 />
