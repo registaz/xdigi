@@ -1,6 +1,7 @@
-import { getGeminiModel } from "./geminiClient";
+import { getGeminiModel, getGeminiFallbackModel } from "./geminiClient";
 import { logger } from "../lib/logger";
 import { CANONICAL_SKILLS, normalizeSkillNames } from "../utils/skillNames";
+import type { GenerativeModel } from "@google/generative-ai";
 
 const FALLBACK_KEYWORDS: Record<string, string[]> = {
   Frontend: [
@@ -69,32 +70,51 @@ function parseSkillsFromResponse(text: string): string[] {
 }
 
 /**
- * Infers the required skill(s) for a task from its title using Gemini.
- * Retries once on failure, then falls back to keyword matching. Never
- * throws — always resolves to a (possibly empty) list of canonical skills.
+ * Runs skill classification against a single Gemini model, retrying once on
+ * failure. Returns null (never throws) if both attempts fail, so callers
+ * can move on to the next fallback tier.
  */
-export async function inferSkills(title: string): Promise<string[]> {
-  const model = getGeminiModel();
-  if (!model) {
-    logger.warn("GEMINI_API_KEY not configured, using keyword fallback for skill inference");
-    return keywordFallback(title);
-  }
-
-  logger.info({ title }, "Calling Gemini LLM for skill inference");
-  
+async function tryModel(model: GenerativeModel, title: string, modelLabel: string): Promise<string[] | null> {
   const maxAttempts = 2;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       const result = await model.generateContent(buildPrompt(title));
       const text = result.response.text().trim();
       const skills = parseSkillsFromResponse(text);
-      logger.info({ title, skills }, "Gemini LLM skill inference succeeded");
+      logger.info({ title, skills, model: modelLabel }, "Gemini LLM skill inference succeeded");
       return skills;
     } catch (err) {
-      logger.warn({ err, attempt }, "Gemini skill inference attempt failed");
+      logger.warn({ err, attempt, model: modelLabel }, "Gemini skill inference attempt failed");
     }
   }
+  return null;
+}
 
-  logger.warn("Gemini skill inference failed after retries, using keyword fallback");
+/**
+ * Infers the required skill(s) for a task from its title using Gemini.
+ * Tries the primary model (`GEMINI_MODEL`, retried once), then falls back to
+ * a secondary model (`GEMINI_MODEL_FALLBACK`, also retried once), and only
+ * falls back to deterministic keyword matching if both models are
+ * unavailable or fail. Never throws — always resolves to a (possibly empty)
+ * list of canonical skills.
+ */
+export async function inferSkills(title: string): Promise<string[]> {
+  const primaryModel = getGeminiModel();
+  if (primaryModel) {
+    logger.info({ title }, "Calling Gemini LLM (primary model) for skill inference");
+    const skills = await tryModel(primaryModel, title, "primary");
+    if (skills) return skills;
+  } else {
+    logger.warn("GEMINI_API_KEY not configured, skipping LLM inference");
+  }
+
+  const fallbackModel = getGeminiFallbackModel();
+  if (fallbackModel) {
+    logger.info({ title }, "Calling Gemini LLM (fallback model) for skill inference");
+    const skills = await tryModel(fallbackModel, title, "fallback");
+    if (skills) return skills;
+  }
+
+  logger.warn("Gemini skill inference failed on primary and fallback models, using keyword fallback");
   return keywordFallback(title);
 }

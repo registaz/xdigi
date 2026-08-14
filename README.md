@@ -192,17 +192,20 @@ Skill inference uses Google Gemini via `@google/generative-ai`.
    ```
    GEMINI_API_KEY=your-key-here
    GEMINI_MODEL=gemini-1.5-flash
+   GEMINI_MODEL_FALLBACK=gemini-1.5-flash-8b
    ```
 3. When creating a task (or subtask) without a `skills` array, the backend
    calls Gemini with the task title and asks it to classify the task into
    `Frontend` and/or `Backend`. The result is normalized to those canonical
    names.
 
-**Fallback behavior:** if `GEMINI_API_KEY` is unset, the Gemini call fails, or
-the response can't be parsed as a JSON array, the backend retries once and
-then falls back to deterministic keyword matching (e.g. "UI", "page", "CSS" →
-Frontend; "API", "database", "migration" → Backend) — task creation never
-fails because of the LLM. See
+**Fallback behavior:** if `GEMINI_API_KEY` is unset, the request to
+`GEMINI_MODEL` fails, or its response can't be parsed as a JSON array, the
+backend retries that model once, then tries `GEMINI_MODEL_FALLBACK` (also
+retried once). Only if both models are unavailable or fail does it fall back
+to deterministic keyword matching (e.g. "UI", "page", "CSS" → Frontend;
+"API", "database", "migration" → Backend) — task creation never fails
+because of the LLM. See
 [backend/src/llm/skillInference.ts](backend/src/llm/skillInference.ts).
 
 ## API reference

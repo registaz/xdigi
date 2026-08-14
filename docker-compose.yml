@@ -29,6 +29,7 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/task_assignment?schema=public
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       GEMINI_MODEL: ${GEMINI_MODEL:-gemini-1.5-flash}
+      GEMINI_MODEL_FALLBACK: ${GEMINI_MODEL_FALLBACK:-gemini-1.5-flash-8b}
     ports:
       - "4000:4000"
     depends_on:

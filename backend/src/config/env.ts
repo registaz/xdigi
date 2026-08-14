@@ -8,6 +8,7 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
   GEMINI_API_KEY: z.string().optional(),
   GEMINI_MODEL: z.string().default("gemini-1.5-flash"),
+  GEMINI_MODEL_FALLBACK: z.string().default("gemini-1.5-flash-8b"),
 });
 
 export type Env = z.infer<typeof envSchema>;
