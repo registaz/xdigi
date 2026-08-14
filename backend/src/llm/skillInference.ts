@@ -92,8 +92,8 @@ async function tryModel(model: GenerativeModel, title: string, modelLabel: strin
 
 /**
  * Infers the required skill(s) for a task from its title using Gemini.
- * Tries the primary model (`GEMINI_MODEL`, retried once), then falls back to
- * a secondary model (`GEMINI_MODEL_FALLBACK`, also retried once), and only
+ * Tries the primary model (`GEMINI_MODEL_STABLE`, retried once), then falls
+ * back to a secondary model (`GEMINI_MODEL_FALLBACK`, also retried once), and only
  * falls back to deterministic keyword matching if both models are
  * unavailable or fail. Never throws — always resolves to a (possibly empty)
  * list of canonical skills.

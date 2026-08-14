@@ -19,6 +19,7 @@ subtasks, and can have their required skills auto-classified by an LLM
 - [Docker Compose](#docker-compose)
 - [Database setup & migrations](#database-setup--migrations)
 - [LLM configuration](#llm-configuration)
+- [Logging](#logging)
 - [API reference](#api-reference)
 - [Business rules](#business-rules)
 - [Testing](#testing)
@@ -161,6 +162,11 @@ Notes on the compose setup:
 - If ports 5432/4000/5173 are already in use on your machine, override them
   under each service's `ports:` mapping (only the host-side port needs to
   change; inter-service communication uses the Docker network service names).
+- The repo-root `.env` is also where you override `GEMINI_MODEL_STABLE`,
+  `GEMINI_MODEL_FALLBACK`, and `LOG_PRETTY` for the containerized backend
+  (`backend/.env` is not read inside Docker — see
+  [LLM configuration](#llm-configuration) and [Logging](#logging)). Leave
+  any of them unset and the backend's own built-in defaults apply.
 
 ## Database setup & migrations
 
@@ -188,25 +194,51 @@ Seed mapping:
 Skill inference uses Google Gemini via `@google/generative-ai`.
 
 1. Get an API key from [Google AI Studio](https://aistudio.google.com/apikey).
-2. Set it in `backend/.env`:
+2. Set it, and optionally override the model names, in the `.env` file for
+   however you're running the backend:
+   - **Local (non-Docker) dev** (`npm run dev`/`npm start` in `backend/`) —
+     `backend/.env` (copy from `backend/.env.example`).
+   - **Docker Compose** (`docker-compose up`) — the repo-root `.env` (copy
+     from the root `.env.example`); `backend/.env` is not read inside the
+     container.
    ```
    GEMINI_API_KEY=your-key-here
-   GEMINI_MODEL=gemini-1.5-flash
-   GEMINI_MODEL_FALLBACK=gemini-1.5-flash-8b
+   GEMINI_MODEL_STABLE=gemini-flash-latest
+   GEMINI_MODEL_FALLBACK=gemini-3.5-flash-lite
    ```
+   Leave `GEMINI_MODEL_STABLE`/`GEMINI_MODEL_FALLBACK` unset in either file
+   and the backend falls back to its own built-in defaults
+   (`gemini-flash-latest` / `gemini-3.5-flash-lite`, defined once in
+   [backend/src/config/env.ts](backend/src/config/env.ts) as the single
+   source of truth) — no file needs to define them for the app to work.
 3. When creating a task (or subtask) without a `skills` array, the backend
    calls Gemini with the task title and asks it to classify the task into
    `Frontend` and/or `Backend`. The result is normalized to those canonical
    names.
 
 **Fallback behavior:** if `GEMINI_API_KEY` is unset, the request to
-`GEMINI_MODEL` fails, or its response can't be parsed as a JSON array, the
-backend retries that model once, then tries `GEMINI_MODEL_FALLBACK` (also
-retried once). Only if both models are unavailable or fail does it fall back
-to deterministic keyword matching (e.g. "UI", "page", "CSS" → Frontend;
-"API", "database", "migration" → Backend) — task creation never fails
-because of the LLM. See
+`GEMINI_MODEL_STABLE` fails, or its response can't be parsed as a JSON
+array, the backend retries that model once, then tries
+`GEMINI_MODEL_FALLBACK` (also retried once). Only if both models are
+unavailable or fail does it fall back to deterministic keyword matching
+(e.g. "UI", "page", "CSS" → Frontend; "API", "database", "migration" →
+Backend) — task creation never fails because of the LLM. See
 [backend/src/llm/skillInference.ts](backend/src/llm/skillInference.ts).
+
+## Logging
+
+The backend uses [pino](https://getpino.io) + `pino-http`. By default
+(`LOG_PRETTY=true`) logs are human-readable, colorized single lines — e.g.
+`GET /api/v1/tasks 200` — rather than raw JSON, and this applies in Docker
+too, not just local dev. Request logs deliberately omit the bulky default
+`req`/`res` objects (headers, remote address, etc.); only method, URL, and
+status code are shown.
+
+- Set `LOG_PRETTY=false` (`backend/.env` or the repo-root `.env` used by
+  Compose) to emit raw structured JSON lines instead, e.g. when shipping
+  logs to an aggregator that parses JSON.
+- Logs are silenced entirely during `npm test` (`NODE_ENV=test`) so expected
+  failure paths (like the LLM-fallback tests) don't spam the test output.
 
 ## API reference
 

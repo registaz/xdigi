@@ -24,7 +24,25 @@ export function createApp(): Express {
     }),
   );
   app.use(express.json());
-  app.use(pinoHttp({ logger }));
+  app.use(
+    pinoHttp({
+      logger,
+      customLogLevel: (_req, res, err) => {
+        if (err || res.statusCode >= 500) return "error";
+        if (res.statusCode >= 400) return "warn";
+        return "info";
+      },
+      customSuccessMessage: (req, res) => `${req.method} ${req.url} ${res.statusCode}`,
+      customErrorMessage: (req, res, err) => `${req.method} ${req.url} ${res.statusCode} - ${err.message}`,
+      // Drop the bulky default req/res objects (headers, remoteAddress,
+      // etc.) — the concise message above already has what matters, and
+      // pino omits keys whose serializer returns undefined.
+      serializers: {
+        req: () => undefined,
+        res: () => undefined,
+      },
+    }),
+  );
 
   app.use("/api/v1", router);
 

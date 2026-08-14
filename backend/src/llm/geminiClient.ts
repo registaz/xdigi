@@ -10,7 +10,7 @@ let client: GoogleGenerativeAI | null = null;
 export function getGeminiModel(): GenerativeModel | null {
   if (!env.GEMINI_API_KEY) return null;
   if (!client) client = new GoogleGenerativeAI(env.GEMINI_API_KEY);
-  return client.getGenerativeModel({ model: env.GEMINI_MODEL });
+  return client.getGenerativeModel({ model: env.GEMINI_MODEL_STABLE });
 }
 
 /**

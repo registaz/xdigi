@@ -27,9 +27,15 @@ services:
       NODE_ENV: production
       CORS_ORIGIN: http://localhost:5173
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/task_assignment?schema=public
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
-      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-1.5-flash}
-      GEMINI_MODEL_FALLBACK: ${GEMINI_MODEL_FALLBACK:-gemini-1.5-flash-8b}
+      # No hardcoded defaults here on purpose — env.ts (zod schema) is the
+      # single source of truth for defaults. Compose only passes these
+      # through from the shell / repo-root .env if set there; if unset,
+      # the variable is simply not passed to the container and the
+      # backend's own default applies.
+      GEMINI_API_KEY:
+      GEMINI_MODEL_STABLE:
+      GEMINI_MODEL_FALLBACK:
+      LOG_PRETTY:
     ports:
       - "4000:4000"
     depends_on:
