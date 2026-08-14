@@ -210,26 +210,11 @@
   font-weight: 600;
 }
 
-.tree-guides {
-  display: flex;
-  flex-shrink: 0;
-}
-
 .tree-guide {
   position: relative;
   width: 1.25rem;
   flex-shrink: 0;
-}
-
-.tree-guide--line::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 2px;
-  background: var(--wisteria);
-  opacity: 0.4;
+  align-self: stretch;
 }
 
 .tree-guide--tee::before,

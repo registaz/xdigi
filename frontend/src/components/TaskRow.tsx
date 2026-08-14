@@ -13,21 +13,13 @@ interface TaskRowProps {
   developers: Developer[];
   onChanged: () => void;
   isLast?: boolean;
-  ancestorContinues?: boolean[];
 }
 
 function countSubtasks(task: Task): number {
   return task.subtasks.reduce((sum, sub) => sum + 1 + countSubtasks(sub), 0);
 }
 
-export function TaskRow({
-  task,
-  depth,
-  developers,
-  onChanged,
-  isLast = true,
-  ancestorContinues = [],
-}: TaskRowProps) {
+export function TaskRow({ task, depth, developers, onChanged, isLast = true }: TaskRowProps) {
   const { run, loading, error } = useAsyncAction((payload: { status?: TaskStatus; developerId?: string | null }) =>
     tasksApi.update(task.id, payload),
   );
@@ -61,19 +53,16 @@ export function TaskRow({
     }
   }
 
-  const childAncestorContinues = [...ancestorContinues, !isLast];
-
   return (
     <>
       <tr className={depth > 0 ? "task-row--nested" : undefined}>
         <td className="task-title-cell">
           {depth > 0 && (
-            <span className="tree-guides" aria-hidden="true">
-              {ancestorContinues.map((continues, i) => (
-                <span key={i} className={`tree-guide${continues ? " tree-guide--line" : ""}`} />
-              ))}
-              <span className={`tree-guide tree-guide--${isLast ? "elbow" : "tee"}`} />
-            </span>
+            <span
+              className={`tree-guide tree-guide--${isLast ? "elbow" : "tee"}`}
+              style={{ marginLeft: `${(depth - 1) * 1.25}rem` }}
+              aria-hidden="true"
+            />
           )}
           {hasSubtasks ? (
             <button
@@ -127,7 +116,6 @@ export function TaskRow({
             task={sub}
             depth={depth + 1}
             isLast={index === task.subtasks.length - 1}
-            ancestorContinues={childAncestorContinues}
             developers={developers}
             onChanged={onChanged}
           />
