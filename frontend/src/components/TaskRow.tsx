@@ -40,6 +40,8 @@ export function TaskRow({
     return true;
   });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [expanded, setExpanded] = useState(true);
+  const hasSubtasks = task.subtasks.length > 0;
 
   async function handleStatusChange(status: TaskStatus) {
     const result = await run({ status });
@@ -73,7 +75,21 @@ export function TaskRow({
               <span className={`tree-guide tree-guide--${isLast ? "elbow" : "tee"}`} />
             </span>
           )}
+          {hasSubtasks ? (
+            <button
+              type="button"
+              className={`task-toggle${expanded ? "" : " task-toggle--collapsed"}`}
+              onClick={() => setExpanded((prev) => !prev)}
+              aria-expanded={expanded}
+              aria-label={expanded ? "Collapse subtasks" : "Expand subtasks"}
+            >
+              ▶
+            </button>
+          ) : (
+            <span className="task-toggle-spacer" aria-hidden="true" />
+          )}
           <span className={`task-title-text${depth === 0 ? " task-title-text--root" : ""}`}>{task.title}</span>
+          {hasSubtasks && !expanded && <span className="task-collapsed-count">{countSubtasks(task)}</span>}
         </td>
         <td>
           <SkillBadges skills={task.skills} />
@@ -104,17 +120,18 @@ export function TaskRow({
           </td>
         </tr>
       )}
-      {task.subtasks.map((sub, index) => (
-        <TaskRow
-          key={sub.id}
-          task={sub}
-          depth={depth + 1}
-          isLast={index === task.subtasks.length - 1}
-          ancestorContinues={childAncestorContinues}
-          developers={developers}
-          onChanged={onChanged}
-        />
-      ))}
+      {expanded &&
+        task.subtasks.map((sub, index) => (
+          <TaskRow
+            key={sub.id}
+            task={sub}
+            depth={depth + 1}
+            isLast={index === task.subtasks.length - 1}
+            ancestorContinues={childAncestorContinues}
+            developers={developers}
+            onChanged={onChanged}
+          />
+        ))}
       <ConfirmDeleteModal
         isOpen={showDeleteModal}
         taskTitle={task.title}
