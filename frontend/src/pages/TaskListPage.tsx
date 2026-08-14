@@ -81,12 +81,13 @@ export function TaskListPage() {
                 <th>Status</th>
                 <th>Assignee</th>
                 <th>Subtasks</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {tasks.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="empty-state">
+                  <td colSpan={6} className="empty-state">
                     No tasks yet. Create one to get started.
                   </td>
                 </tr>

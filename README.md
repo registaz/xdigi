@@ -23,6 +23,7 @@ subtasks, and can have their required skills auto-classified by an LLM
 - [Business rules](#business-rules)
 - [Testing](#testing)
 - [Key libraries & rationale](#key-libraries--rationale)
+- [Tested environment](#tested-environment)
 
 ## Architecture
 
@@ -82,9 +83,9 @@ covered by unit and integration tests.
 /frontend
   src/
     api/             # typed fetch client per resource
-    components/      # StatusSelect, DeveloperSelect, SkillBadges, TaskRow, NewTaskNode
+    components/      # Modal, StatusSelect, DeveloperSelect, SkillBadges, TaskRow, NewTaskNode, ConfirmDeleteModal
     pages/           # TaskListPage, CreateTaskPage
-    hooks/           # useFetch, useAsyncAction
+    hooks/           # useAsync.ts (useFetch, useAsyncAction)
     types/           # shared TS types mirroring backend DTOs
 /docker-compose.yml
 ```
@@ -220,6 +221,7 @@ Base URL: `http://localhost:4000/api/v1`
 | GET    | `/tasks`     | List all root tasks with nested subtasks |
 | GET    | `/tasks/:id` | Get one task (with its full subtask subtree) |
 | PATCH  | `/tasks/:id` | Update `status` and/or `developerId` |
+| DELETE | `/tasks/:id` | Delete a task; cascades to all nested subtasks |
 
 **Create** — `POST /tasks`
 
@@ -266,6 +268,13 @@ Response (`201`):
 { "developerId": "ee790ff3-3d4e-4ee9-b4f7-572d11b0e048" }
 ```
 
+**Delete** — `DELETE /tasks/:id`
+
+Deletes the task and, via a cascading foreign key on `parentTaskId`, every
+nested subtask beneath it (any depth). Returns `204` on success or `404` if
+the task doesn't exist. The frontend warns the user and asks for
+confirmation before deleting a task that has subtasks.
+
 Error responses use a consistent shape:
 
 ```json
@@ -305,6 +314,10 @@ Enforced in [backend/src/services/taskRules.ts](backend/src/services/taskRules.t
   rejected explicitly.
 - **Recursive Done validation** — a task cannot be set to `DONE` while any
   subtask, at any nesting depth, is not `DONE`.
+- **Cascading delete** — deleting a task also deletes every nested subtask
+  beneath it (any depth), enforced via a cascading foreign key at the
+  database level; the frontend requires explicit confirmation before
+  deleting a task that has subtasks.
 
 ## Testing
 
@@ -346,6 +359,20 @@ Postgres port).
 - **TypeScript strict mode** end-to-end for compile-time safety across the API boundary.
 - **ESLint + Prettier** for a consistent, enforced code style.
 
+## Tested environment
+
+Verified locally on:
+
+| Tool | Version |
+|------|---------|
+| OS | Ubuntu 20.04.6 LTS |
+| Node.js | v24.14.1 |
+| npm | 11.11.0 |
+| Docker | 28.1.1, build 4eba377 |
+| Docker Compose | bundled with the above Docker Engine (V2 `docker compose` plugin) |
+
+The app targets Node.js 22+ and PostgreSQL 16 (see [Local development](#local-development)); adjust the above if your setup differs.
+
 ## Repository
 
-Source: _add your public repository URL here before sharing._
+Source: https://github.com/registaz/xdigi

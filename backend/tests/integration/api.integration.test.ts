@@ -163,4 +163,45 @@ describe("API integration", () => {
     expect(res.status).toBe(200);
     expect(res.body.developers.some((d: { id: string }) => d.id === backendDevId)).toBe(true);
   });
+
+  it("DELETE /api/v1/tasks/:id removes a leaf task", async () => {
+    const created = await request(app).post("/api/v1/tasks").send({ title: "Disposable task", skills: [] });
+
+    const del = await request(app).delete(`/api/v1/tasks/${created.body.id}`);
+    expect(del.status).toBe(204);
+
+    const getAfter = await request(app).get(`/api/v1/tasks/${created.body.id}`);
+    expect(getAfter.status).toBe(404);
+  });
+
+  it("DELETE /api/v1/tasks/:id on a parent cascades to all nested subtasks", async () => {
+    const created = await request(app)
+      .post("/api/v1/tasks")
+      .send({
+        title: "Parent to delete",
+        skills: ["Frontend"],
+        subtasks: [
+          {
+            title: "Child to delete",
+            skills: ["Frontend"],
+            subtasks: [{ title: "Grandchild to delete", skills: ["Frontend"] }],
+          },
+        ],
+      });
+    const parentId = created.body.id;
+    const childId = created.body.subtasks[0].id;
+    const grandchildId = created.body.subtasks[0].subtasks[0].id;
+
+    const del = await request(app).delete(`/api/v1/tasks/${parentId}`);
+    expect(del.status).toBe(204);
+
+    expect((await request(app).get(`/api/v1/tasks/${parentId}`)).status).toBe(404);
+    expect((await request(app).get(`/api/v1/tasks/${childId}`)).status).toBe(404);
+    expect((await request(app).get(`/api/v1/tasks/${grandchildId}`)).status).toBe(404);
+  });
+
+  it("DELETE /api/v1/tasks/:id returns 404 for an unknown task id", async () => {
+    const res = await request(app).delete("/api/v1/tasks/00000000-0000-0000-0000-000000000000");
+    expect(res.status).toBe(404);
+  });
 });

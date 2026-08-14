@@ -1,7 +1,9 @@
+import { useState } from "react";
 import type { Developer, Task, TaskStatus } from "../types";
 import { StatusSelect } from "./StatusSelect";
 import { DeveloperSelect } from "./DeveloperSelect";
 import { SkillBadges } from "./SkillBadges";
+import { ConfirmDeleteModal } from "./ConfirmDeleteModal";
 import { tasksApi } from "../api/tasks";
 import { useAsyncAction } from "../hooks/useAsync";
 
@@ -20,6 +22,15 @@ export function TaskRow({ task, depth, developers, onChanged }: TaskRowProps) {
   const { run, loading, error } = useAsyncAction((payload: { status?: TaskStatus; developerId?: string | null }) =>
     tasksApi.update(task.id, payload),
   );
+  const {
+    run: runDelete,
+    loading: deleting,
+    error: deleteError,
+  } = useAsyncAction(async () => {
+    await tasksApi.remove(task.id);
+    return true;
+  });
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   async function handleStatusChange(status: TaskStatus) {
     const result = await run({ status });
@@ -29,6 +40,14 @@ export function TaskRow({ task, depth, developers, onChanged }: TaskRowProps) {
   async function handleDeveloperChange(developerId: string | null) {
     const result = await run({ developerId });
     if (result) onChanged();
+  }
+
+  async function handleConfirmDelete() {
+    const result = await runDelete();
+    if (result) {
+      setShowDeleteModal(false);
+      onChanged();
+    }
   }
 
   return (
@@ -54,10 +73,15 @@ export function TaskRow({ task, depth, developers, onChanged }: TaskRowProps) {
           />
         </td>
         <td>{countSubtasks(task)}</td>
+        <td>
+          <button type="button" className="button button--danger" onClick={() => setShowDeleteModal(true)}>
+            Delete
+          </button>
+        </td>
       </tr>
       {error && (
         <tr>
-          <td colSpan={5} className="row-error">
+          <td colSpan={6} className="row-error">
             {error}
           </td>
         </tr>
@@ -65,6 +89,15 @@ export function TaskRow({ task, depth, developers, onChanged }: TaskRowProps) {
       {task.subtasks.map((sub) => (
         <TaskRow key={sub.id} task={sub} depth={depth + 1} developers={developers} onChanged={onChanged} />
       ))}
+      <ConfirmDeleteModal
+        isOpen={showDeleteModal}
+        taskTitle={task.title}
+        descendantCount={countSubtasks(task)}
+        loading={deleting}
+        error={deleteError}
+        onCancel={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+      />
     </>
   );
 }

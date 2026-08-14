@@ -168,6 +168,17 @@ export async function createTask(input: CreateTaskInput): Promise<TaskDTO> {
   return getTaskById(id);
 }
 
+/**
+ * Deletes a task by id. Descendant subtasks and their task-skill links are
+ * removed automatically at the database level via the `onDelete: Cascade`
+ * self-relation on `Task.parentTask`, which Postgres applies transitively.
+ */
+export async function deleteTask(id: string): Promise<void> {
+  const existing = await prisma.task.findUnique({ where: { id } });
+  if (!existing) throw AppError.notFound(`Task ${id} not found`);
+  await prisma.task.delete({ where: { id } });
+}
+
 export async function updateTask(id: string, input: UpdateTaskInput): Promise<TaskDTO> {
   await prisma.$transaction(async (tx) => {
     const existing = await tx.task.findUnique({
