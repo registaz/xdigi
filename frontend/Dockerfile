@@ -1,11 +1,11 @@
 # The API base URL is baked in at build time (Vite env vars are inlined into
 # the bundle), so it must be supplied as a build ARG rather than a runtime
 # environment variable.
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+RUN npm install -g npm@12.0.2 && npm ci
 
 COPY . .
 

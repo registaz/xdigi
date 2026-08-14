@@ -5,7 +5,7 @@
 # available for `prisma migrate deploy` at container start, at the cost of a
 # larger image — an acceptable trade-off for this app's scope.
 
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
 WORKDIR /app
 
 # Optional build-time proxy support for restricted/corporate networks.
@@ -22,7 +22,7 @@ ARG NODE_TLS_REJECT_UNAUTHORIZED=1
 ENV NODE_TLS_REJECT_UNAUTHORIZED=$NODE_TLS_REJECT_UNAUTHORIZED
 
 COPY package*.json ./
-RUN npm ci
+RUN npm install -g npm@12.0.2 && npm ci
 
 COPY prisma ./prisma
 RUN npx prisma generate
@@ -31,7 +31,7 @@ COPY tsconfig.json ./
 COPY src ./src
 RUN npm run build
 
-FROM node:22-alpine AS runtime
+FROM node:24-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 
