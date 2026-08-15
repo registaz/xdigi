@@ -1,12 +1,5 @@
 import type { TaskStatus } from "../types";
-
-const STATUS_OPTIONS: TaskStatus[] = ["TODO", "IN_PROGRESS", "DONE"];
-
-const STATUS_LABELS: Record<TaskStatus, string> = {
-  TODO: "To-do",
-  IN_PROGRESS: "In Progress",
-  DONE: "Done",
-};
+import { STATUS_LABELS, STATUS_OPTIONS } from "../utils/statusLabels";
 
 interface StatusSelectProps {
   value: TaskStatus;

@@ -5,6 +5,8 @@ import { StatusSelect } from "./StatusSelect";
 import { DeveloperSelect } from "./DeveloperSelect";
 import { SkillBadges } from "./SkillBadges";
 import { ConfirmDeleteModal } from "./ConfirmDeleteModal";
+import { useToast } from "../hooks/useToast";
+import { STATUS_LABELS } from "../utils/statusLabels";
 import { tasksApi } from "../api/tasks";
 import { useAsyncAction } from "../hooks/useAsync";
 
@@ -32,6 +34,7 @@ function CollapsibleCell({ collapsed, className, children }: { collapsed: boolea
 }
 
 export function TaskRow({ task, depth, developers, onChanged, isLast = true, hidden = false }: TaskRowProps) {
+  const { showToast } = useToast();
   const { run, loading, error } = useAsyncAction((payload: { status?: TaskStatus; developerId?: string | null }) =>
     tasksApi.update(task.id, payload),
   );
@@ -49,12 +52,19 @@ export function TaskRow({ task, depth, developers, onChanged, isLast = true, hid
 
   async function handleStatusChange(status: TaskStatus) {
     const result = await run({ status });
-    if (result) onChanged();
+    if (result) {
+      onChanged();
+      showToast(`Status updated to "${STATUS_LABELS[status]}"`);
+    }
   }
 
   async function handleDeveloperChange(developerId: string | null) {
     const result = await run({ developerId });
-    if (result) onChanged();
+    if (result) {
+      onChanged();
+      const developerName = developers.find((dev) => dev.id === developerId)?.name;
+      showToast(developerName ? `Assignee updated to ${developerName}` : "Assignee unassigned");
+    }
   }
 
   async function handleConfirmDelete() {
