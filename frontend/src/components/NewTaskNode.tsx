@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from "react";
 import type { DraftTask } from "../utils/taskDraft";
 import { createDraftTask } from "../utils/taskDraft";
 
@@ -11,7 +12,19 @@ interface NewTaskNodeProps {
   showErrors: boolean;
 }
 
+function autoResize(el: HTMLTextAreaElement | null) {
+  if (!el) return;
+  el.style.height = "auto";
+  el.style.height = `${el.scrollHeight}px`;
+}
+
 export function NewTaskNode({ draft, depth, onChange, onRemove, showErrors }: NewTaskNodeProps) {
+  const titleRef = useRef<HTMLTextAreaElement>(null);
+
+  useLayoutEffect(() => {
+    autoResize(titleRef.current);
+  }, [draft.title]);
+
   function updateTitle(title: string) {
     onChange({ ...draft, title });
   }
@@ -38,12 +51,16 @@ export function NewTaskNode({ draft, depth, onChange, onRemove, showErrors }: Ne
   return (
     <div className={`task-node${depth > 0 ? " task-node--nested" : ""}`}>
       <div className="task-node-row">
-        <input
-          type="text"
+        <textarea
+          ref={titleRef}
           className={`task-title-input${showTitleError ? " field-invalid" : ""}`}
           placeholder="Task title"
           value={draft.title}
-          onChange={(e) => updateTitle(e.target.value)}
+          onChange={(e) => {
+            updateTitle(e.target.value);
+            autoResize(e.target);
+          }}
+          rows={1}
         />
         <div className="skill-checkboxes">
           {AVAILABLE_SKILLS.map((skill) => (

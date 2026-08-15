@@ -131,7 +131,7 @@
 .task-table td {
   padding: 0;
   text-align: left;
-  vertical-align: middle;
+  vertical-align: top;
   border-bottom: 1px solid var(--border);
   transition: border-color 0.22s ease;
 }
@@ -153,7 +153,7 @@
 
 .cell-collapse-inner {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   overflow: hidden;
   min-height: 0;
   padding: 10px 12px;
@@ -183,10 +183,6 @@
 
 .task-table tbody tr.task-row--nested:hover {
   background: rgba(149, 93, 180, 0.24);
-}
-
-.task-title-cell .cell-collapse-inner {
-  align-items: flex-start;
 }
 
 .task-title-text {
@@ -358,7 +354,7 @@
 .task-node-row {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
 }
 
@@ -369,7 +365,11 @@
   border: 1px solid var(--border);
   background: var(--bg);
   color: var(--text);
+  font-family: inherit;
   font-size: 14px;
+  line-height: 1.4;
+  resize: none;
+  overflow: hidden;
 }
 
 .task-title-input.field-invalid {
@@ -378,8 +378,10 @@
 
 .skill-checkboxes {
   display: flex;
+  align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+  min-height: 38px;
 }
 
 .skill-checkbox {
@@ -391,8 +393,10 @@
 
 .task-node-actions {
   display: flex;
+  align-items: center;
   gap: 8px;
   margin-left: auto;
+  min-height: 38px;
 }
 
 .task-node-actions button {
