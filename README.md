@@ -201,12 +201,12 @@ Skill inference uses Google Gemini via `@google/generative-ai`.
      container.
    ```
    GEMINI_API_KEY=your-key-here
-   GEMINI_MODEL_STABLE=gemini-flash-latest
+   GEMINI_MODEL_STABLE=ggemini-3.6-flash
    GEMINI_MODEL_FALLBACK=gemini-3.5-flash-lite
    ```
    Leave `GEMINI_MODEL_STABLE`/`GEMINI_MODEL_FALLBACK` unset in either file
    and the backend falls back to its own built-in defaults
-   (`gemini-flash-latest` / `gemini-3.5-flash-lite`, defined once in
+   (`gemini-3.6-flash` / `gemini-3.5-flash-lite`, defined once in
    [backend/src/config/env.ts](backend/src/config/env.ts) as the single
    source of truth) — no file needs to define them for the app to work.
 3. When creating a task (or subtask) without a `skills` array, the backend
