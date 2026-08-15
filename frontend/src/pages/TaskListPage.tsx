@@ -74,6 +74,14 @@ export function TaskListPage() {
       {!loading && !error && (
         <div className="table-wrapper">
           <table className="task-table">
+            <colgroup>
+              <col />
+              <col className="col-skills" />
+              <col className="col-status" />
+              <col className="col-assignee" />
+              <col className="col-subtasks" />
+              <col className="col-actions" />
+            </colgroup>
             <thead>
               <tr>
                 <th>Title</th>

@@ -117,8 +117,29 @@
 
 .task-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   font-size: 14px;
+}
+
+.col-skills {
+  width: 140px;
+}
+
+.col-status {
+  width: 140px;
+}
+
+.col-assignee {
+  width: 170px;
+}
+
+.col-subtasks {
+  width: 90px;
+}
+
+.col-actions {
+  width: 100px;
 }
 
 .task-table th {
@@ -314,6 +335,7 @@
 
 .status-select,
 .developer-select {
+  width: 100%;
   font-size: 13px;
   padding: 4px 6px;
   border-radius: 6px;
