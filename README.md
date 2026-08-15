@@ -6,7 +6,7 @@ subtasks, and can have their required skills auto-classified by an LLM
 (Gemini) when left unspecified.
 
 - **Backend:** Node.js + TypeScript + Express + Prisma + PostgreSQL
-- **Frontend:** React 19 + TypeScript + Vite + react-router-dom
+- **Frontend:** React 19 + TypeScript + Vite (single-page app)
 - **LLM:** Google Gemini (`@google/generative-ai`), with a deterministic
   keyword-based fallback when no API key is configured or the LLM call fails
 - **Deployment:** Docker Compose (Postgres + backend + frontend)
@@ -31,8 +31,7 @@ subtasks, and can have their required skills auto-classified by an LLM
 ```mermaid
 flowchart LR
   subgraph Frontend [React + Vite]
-    TaskList[Task List Page]
-    CreateTask[Create Task Page]
+    TaskList[Task List Page + create-task modal]
   end
 
   subgraph Backend [Express API]
@@ -44,7 +43,6 @@ flowchart LR
   DB[(PostgreSQL via Prisma)]
 
   TaskList -->|REST /api/v1| Routes
-  CreateTask -->|REST /api/v1| Routes
   Routes --> Services
   Services --> DB
   Services -->|skills omitted| LLM
@@ -85,7 +83,7 @@ covered by unit and integration tests.
   src/
     api/             # typed fetch client per resource
     components/      # Modal, StatusSelect, DeveloperSelect, SkillBadges, TaskRow, NewTaskNode, ConfirmDeleteModal
-    pages/           # TaskListPage, CreateTaskPage
+    pages/           # TaskListPage (list view + create-task modal)
     hooks/           # useAsync.ts (useFetch, useAsyncAction)
     types/           # shared TS types mirroring backend DTOs
 /docker-compose.yml
@@ -126,8 +124,8 @@ npm run dev             # starts Vite on http://localhost:5173
 
 Other frontend scripts: `npm run build`, `npm run lint`, `npm run preview`.
 
-Open `http://localhost:5173` — the Task List page loads first, with a link to
-the Create Task page.
+Open `http://localhost:5173` — the Task List page loads, with a "+ New Task"
+button that opens the create-task form in a modal.
 
 ## Docker Compose
 
@@ -387,7 +385,7 @@ Postgres port).
 
 **Frontend**
 - **Vite** — fast dev server and build tooling with first-class TypeScript/React support.
-- **react-router-dom** — standard client-side routing for the two-page app (list, create).
+- No router — the app is a single page (task list with a create-task modal), so client-side routing isn't needed.
 - No additional data-fetching/state library — the app's data needs (list + a couple of mutations) are simple enough that a small custom `useFetch`/`useAsyncAction` hook pair avoids extra dependencies.
 
 **Both**
