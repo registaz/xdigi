@@ -6,7 +6,7 @@ type TxClient = Prisma.TransactionClient;
 const ALLOWED_TRANSITIONS: Record<TaskStatus, TaskStatus[]> = {
   TODO: ["IN_PROGRESS"],
   IN_PROGRESS: ["TODO", "DONE"],
-  DONE: ["IN_PROGRESS"],
+  DONE: ["IN_PROGRESS", "TODO"],
 };
 
 /**

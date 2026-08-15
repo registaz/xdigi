@@ -31,8 +31,8 @@ describe("assertValidStatusTransition", () => {
     expect(() => assertValidStatusTransition("TODO", "DONE")).toThrow(AppError);
   });
 
-  it("rejects DONE -> TODO directly", () => {
-    expect(() => assertValidStatusTransition("DONE", "TODO")).toThrow(AppError);
+  it("allows DONE -> TODO directly (reopen)", () => {
+    expect(() => assertValidStatusTransition("DONE", "TODO")).not.toThrow();
   });
 });
 
