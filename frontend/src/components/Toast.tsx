@@ -10,6 +10,7 @@ interface ToastItem {
 }
 
 const TOAST_DURATION_MS = 3000;
+const MAX_VISIBLE_TOASTS = 3;
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
@@ -22,7 +23,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const showToast = useCallback(
     (message: string, variant: ToastVariant = "success") => {
       const id = nextId.current++;
-      setToasts((prev) => [...prev, { id, message, variant }]);
+      setToasts((prev) => [...prev.slice(-(MAX_VISIBLE_TOASTS - 1)), { id, message, variant }]);
       window.setTimeout(() => dismissToast(id), TOAST_DURATION_MS);
     },
     [dismissToast],
