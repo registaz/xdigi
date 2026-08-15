@@ -72,6 +72,7 @@ export function TaskRow({ task, depth, developers, onChanged, isLast = true, hid
     if (result) {
       setShowDeleteModal(false);
       onChanged();
+      showToast(`"${task.title}" deleted`);
     }
   }
 
