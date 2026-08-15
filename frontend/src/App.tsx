@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { TaskListPage } from "./pages/TaskListPage";
 import { ToastProvider } from "./components/Toast";
 import "./App.css";
@@ -8,9 +7,7 @@ function App() {
     <ToastProvider>
       <div className="app-shell">
         <header className="app-header">
-          <Link to="/" className="app-title">
-            Task Assignment
-          </Link>
+          <span className="app-title">Task Assignment</span>
         </header>
         <main className="app-main">
           <TaskListPage />

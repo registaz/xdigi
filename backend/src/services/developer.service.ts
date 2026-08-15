@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, TaskStatus } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { AppError } from "../errors/AppError";
 
@@ -15,7 +15,7 @@ export interface DeveloperDTO {
   id: string;
   name: string;
   skills: string[];
-  tasks: { id: string; title: string; status: string; skills: string[] }[];
+  tasks: { id: string; title: string; status: TaskStatus; skills: string[] }[];
 }
 
 function toDto(developer: DeveloperRow): DeveloperDTO {

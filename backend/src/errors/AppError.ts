@@ -19,10 +19,6 @@ export class AppError extends Error {
     this.details = details;
   }
 
-  static badRequest(message: string, details?: unknown): AppError {
-    return new AppError(400, "VALIDATION_ERROR", message, details);
-  }
-
   static notFound(message: string): AppError {
     return new AppError(404, "NOT_FOUND", message);
   }

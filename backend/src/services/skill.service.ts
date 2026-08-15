@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, TaskStatus } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { AppError } from "../errors/AppError";
 
@@ -15,7 +15,7 @@ export interface SkillDTO {
   id: string;
   name: string;
   developers: { id: string; name: string }[];
-  tasks: { id: string; title: string; status: string }[];
+  tasks: { id: string; title: string; status: TaskStatus }[];
 }
 
 function toDto(skill: SkillRow): SkillDTO {
