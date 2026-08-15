@@ -186,11 +186,13 @@
 }
 
 .task-title-cell .cell-collapse-inner {
-  white-space: nowrap;
+  align-items: flex-start;
 }
 
 .task-title-text {
   margin-left: 4px;
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
 
 .task-title-text--root {
