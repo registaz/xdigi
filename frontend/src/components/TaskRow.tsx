@@ -35,8 +35,9 @@ function CollapsibleCell({ collapsed, className, children }: { collapsed: boolea
 
 export function TaskRow({ task, depth, developers, onChanged, isLast = true, hidden = false }: TaskRowProps) {
   const { showToast } = useToast();
-  const { run, loading, error } = useAsyncAction((payload: { status?: TaskStatus; developerId?: string | null }) =>
-    tasksApi.update(task.id, payload),
+  const { run, loading } = useAsyncAction(
+    (payload: { status?: TaskStatus; developerId?: string | null }) => tasksApi.update(task.id, payload),
+    { onError: (message) => showToast(message, "error") },
   );
   const {
     run: runDelete,
@@ -125,13 +126,6 @@ export function TaskRow({ task, depth, developers, onChanged, isLast = true, hid
           </button>
         </CollapsibleCell>
       </tr>
-      {error && (
-        <tr>
-          <td colSpan={6} className="row-error">
-            {error}
-          </td>
-        </tr>
-      )}
       {task.subtasks.map((sub, index) => (
         <TaskRow
           key={sub.id}

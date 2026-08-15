@@ -305,12 +305,6 @@
   padding: 24px 12px;
 }
 
-.task-table td.row-error {
-  color: #d1341f;
-  font-size: 13px;
-  padding: 4px 12px 12px;
-}
-
 .skill-badges {
   display: flex;
   flex-wrap: wrap;
@@ -342,6 +336,24 @@
   border: 1px solid var(--border);
   background: var(--bg);
   color: var(--text);
+}
+
+.status-select--todo {
+  border-color: #d1341f;
+  color: #d1341f;
+  background: rgba(209, 52, 31, 0.08);
+}
+
+.status-select--in-progress {
+  border-color: #b45309;
+  color: #b45309;
+  background: rgba(180, 83, 9, 0.08);
+}
+
+.status-select--done {
+  border-color: #15803d;
+  color: #15803d;
+  background: rgba(21, 128, 61, 0.08);
 }
 
 .status-select:focus-visible,

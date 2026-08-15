@@ -44,15 +44,23 @@ export function useFetch<T>(fetcher: () => Promise<T>) {
 /**
  * Wraps an async mutation function with loading/error state tracking.
  * Returns undefined (instead of throwing) when the action fails, so
- * callers can simply check the result.
+ * callers can simply check the result. An optional `onError` callback
+ * receives the error message synchronously (useful for e.g. showing a
+ * toast right away, since reading the `error` state right after `run()`
+ * resolves would still reflect the previous render).
  */
-export function useAsyncAction<Args extends unknown[], R>(action: (...args: Args) => Promise<R>) {
+export function useAsyncAction<Args extends unknown[], R>(
+  action: (...args: Args) => Promise<R>,
+  options?: { onError?: (message: string) => void },
+) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const actionRef = useRef(action);
+  const optionsRef = useRef(options);
 
   useEffect(() => {
     actionRef.current = action;
+    optionsRef.current = options;
   });
 
   const run = useCallback(async (...args: Args): Promise<R | undefined> => {
@@ -64,7 +72,9 @@ export function useAsyncAction<Args extends unknown[], R>(action: (...args: Args
       return result;
     } catch (err) {
       setLoading(false);
-      setError(errorMessage(err));
+      const message = errorMessage(err);
+      setError(message);
+      optionsRef.current?.onError?.(message);
       return undefined;
     }
   }, []);
